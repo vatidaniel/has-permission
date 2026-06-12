@@ -33,10 +33,10 @@ mvn -pl core test                    # test only the core module
 mvn -pl spring-boot-starter test     # test only the starter (core must be installed, or add -am)
 mvn -pl core test -Dtest=HasPermissionAuthorizerTest#testClassLevelAdvice   # single method
 
-mvn clean deploy -P release -DperformRelease=true   # GPG sign + deploy both modules to OSSRH
+mvn clean deploy -P release -DperformRelease=true   # GPG sign + publish all modules to the Central Portal
 ```
 
-The `release` profile (GPG, javadoc-jar, sources-jar, nexus-staging) lives in the parent and only activates with `-DperformRelease=true`; normal builds skip it.
+The `release` profile (GPG, javadoc-jar, sources-jar, central-publishing) lives in the parent and only activates with `-DperformRelease=true`; normal builds skip it. Publishing targets the **Central Publisher Portal** via the `central-publishing-maven-plugin` (the legacy OSSRH `s01.oss.sonatype.org` endpoint was sunset 2025-06-30), so there is intentionally no `<distributionManagement>`. The plugin authenticates against a `<server id="central">` user-token entry in `~/.m2/settings.xml`; `autoPublish=true` releases automatically once Central's validation passes.
 
 ## Dependency-management gotcha
 
