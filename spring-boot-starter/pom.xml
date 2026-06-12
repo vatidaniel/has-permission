@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.vatisteve</groupId>
+        <artifactId>has-permission-parent</artifactId>
+        <version>0.2.0</version>
+    </parent>
+
+    <artifactId>has-permission-spring-boot-starter</artifactId>
+    <packaging>jar</packaging>
+
+    <name>has-permission-spring-boot-starter</name>
+    <description>
+        Spring Boot starter that auto-configures the has-permission library. Bringing this dependency onto the
+        classpath and exposing a PermissionService bean is enough to enable the @HasPermission aspect — no manual
+        bean wiring or @EnableAspectJAutoProxy required. Behaviour is tunable via the `has-permission.*` properties.
+    </description>
+    <url>https://github.com/vatisteve/has-permission</url>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.vatisteve</groupId>
+            <artifactId>has-permission</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!-- Brings spring-aop + aspectjweaver and triggers Boot's AOP auto-config -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- Generates configuration metadata for has-permission.* properties (IDE assistance) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

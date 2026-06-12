@@ -75,6 +75,21 @@ class HasPermissionAuthorizerTest {
     }
 
     @Test
+    void testValueAliasIsHonored() {
+        // `value` is an alias for `of`; when `of` is empty, `value` must be used
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#userId");
+        when(hasPermission.of()).thenReturn("");
+        when(hasPermission.value()).thenReturn("READ");
+        when(hasPermission.allOf()).thenReturn(new String[]{});
+        when(hasPermission.anyOf()).thenReturn(new String[]{});
+        when(permissionService.getPermissions("user123")).thenReturn(Set.of("READ", "WRITE"));
+        // Execute (should pass since user has READ)
+        authorizer.checkPermissionOnMethod(joinPoint, hasPermission);
+        verify(permissionService).getPermissions("user123");
+    }
+
+    @Test
     void testCheckAllOfPermissions() {
         // Setup
         HasPermission hasPermission = createHasPermissionWithAllOf("READ", "WRITE");
@@ -120,14 +135,101 @@ class HasPermissionAuthorizerTest {
     }
 
     @Test
-    void testEmptyPermissionCheck() {
-        // Setup - no permissions required
-        HasPermission hasPermission = createEmptyHasPermission();
-        Set<String> permissions = Set.of("READ", "WRITE");
-        when(permissionService.getPermissions("user123")).thenReturn(permissions);
-        // Execute
+    void testCombinedConstraintsAllSatisfied() {
+        // of + allOf + anyOf are combined with AND semantics
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#userId");
+        when(hasPermission.of()).thenReturn("EDIT");
+        when(hasPermission.allOf()).thenReturn(new String[]{"PUBLISH"});
+        when(hasPermission.anyOf()).thenReturn(new String[]{"EDITOR", "ADMIN"});
+        when(permissionService.getPermissions("user123"))
+                .thenReturn(Set.of("EDIT", "PUBLISH", "EDITOR"));
+        // Execute (all three satisfied)
         authorizer.checkPermissionOnMethod(joinPoint, hasPermission);
-        // Verify - should pass without checking permissions
+        verify(permissionService).getPermissions("user123");
+    }
+
+    @Test
+    void testCombinedConstraintsOneMissingIsDenied() {
+        // Missing the anyOf requirement -> denied even though of + allOf pass
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#userId");
+        when(hasPermission.of()).thenReturn("EDIT");
+        when(hasPermission.allOf()).thenReturn(new String[]{"PUBLISH"});
+        when(hasPermission.anyOf()).thenReturn(new String[]{"EDITOR", "ADMIN"});
+        when(permissionService.getPermissions("user123"))
+                .thenReturn(Set.of("EDIT", "PUBLISH"));
+        assertThrows(PermissionDeniedException.class,
+                () -> authorizer.checkPermissionOnMethod(joinPoint, hasPermission));
+    }
+
+    @Test
+    void testEmptyAnnotationIsNoOpAndDoesNotConsultService() {
+        // No constraints -> allow without ever calling the PermissionService
+        HasPermission hasPermission = createEmptyHasPermission();
+        authorizer.checkPermissionOnMethod(joinPoint, hasPermission);
+        verifyNoInteractions(permissionService);
+    }
+
+    @Test
+    void testNullSubjectWithConstraintsIsDeniedByDefault() {
+        // Subject expression resolves to null; constraints are present -> fail-closed deny
+        // of="READ" short-circuits the no-constraints check, so allOf/anyOf are never read
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#nonExistentVar");
+        when(hasPermission.of()).thenReturn("READ");
+        assertThrows(PermissionDeniedException.class,
+                () -> authorizer.checkPermissionOnMethod(joinPoint, hasPermission));
+        verifyNoInteractions(permissionService);
+    }
+
+    @Test
+    void testNullSubjectWithEmptyConstraintsIsAllowed() {
+        // Subject null but no constraints -> still allowed (no-op annotation)
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#nonExistentVar");
+        when(hasPermission.of()).thenReturn("");
+        when(hasPermission.value()).thenReturn("");
+        when(hasPermission.allOf()).thenReturn(new String[]{});
+        when(hasPermission.anyOf()).thenReturn(new String[]{});
+        authorizer.checkPermissionOnMethod(joinPoint, hasPermission);
+        verifyNoInteractions(permissionService);
+    }
+
+    @Test
+    void testNullSubjectAllowedWhenDenyOnNullSubjectDisabled() {
+        // With denyOnNullSubject=false, a null subject is passed through to the service
+        HasPermissionAuthorizer<String> lenientAuthorizer =
+                new HasPermissionAuthorizer<>(permissionService, "userId", false);
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("#nonExistentVar");
+        when(hasPermission.of()).thenReturn("READ");
+        when(hasPermission.allOf()).thenReturn(new String[]{});
+        when(hasPermission.anyOf()).thenReturn(new String[]{});
+        when(permissionService.getPermissions(null)).thenReturn(Set.of("READ"));
+        // Execute (service grants READ for the null subject) -> allowed
+        lenientAuthorizer.checkPermissionOnMethod(joinPoint, hasPermission);
+        verify(permissionService).getPermissions(null);
+    }
+
+    @Test
+    void testInvalidSpelExpressionIsDenied() {
+        // A malformed SpEL expression is swallowed to a null subject -> denied (fail-closed)
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.subject()).thenReturn("1 +");
+        when(hasPermission.of()).thenReturn("READ");
+        assertThrows(PermissionDeniedException.class,
+                () -> authorizer.checkPermissionOnMethod(joinPoint, hasPermission));
+        verifyNoInteractions(permissionService);
+    }
+
+    @Test
+    void testClassLevelAdvice() {
+        // checkPermissionOnClass resolves the subject for method-execution join points
+        when(joinPoint.getKind()).thenReturn(JoinPoint.METHOD_EXECUTION);
+        HasPermission hasPermission = createHasPermission("READ");
+        when(permissionService.getPermissions("user123")).thenReturn(Set.of("READ", "WRITE"));
+        authorizer.checkPermissionOnClass(joinPoint, hasPermission);
         verify(permissionService).getPermissions("user123");
     }
 

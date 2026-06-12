@@ -17,4 +17,14 @@ public class PermissionDeniedException extends RuntimeException {
     public PermissionDeniedException(String message) {
         super(message);
     }
+
+    /**
+     * Constructs a new {@link PermissionDeniedException} with the specified detail message and cause.
+     *
+     * @param message the detail message explaining the reason for the exception
+     * @param cause the underlying cause of the permission failure
+     */
+    public PermissionDeniedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
