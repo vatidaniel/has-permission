@@ -12,17 +12,50 @@ A lightweight, annotation-based permission control system for Spring application
 
 ## Installation
 
-Add the library to your Maven project:
+### Spring Boot (recommended)
+
+Add the starter — it auto-configures the aspect from any `PermissionService` bean you expose, so no
+manual bean wiring or `@EnableAspectJAutoProxy` is required:
 
 ```xml
 <dependency>
     <groupId>io.github.vatisteve</groupId>
-    <artifactId>permission-control</artifactId>
-    <version>0.1.0</version>
+    <artifactId>has-permission-spring-boot-starter</artifactId>
+    <version>0.2.0</version>
+</dependency>
+```
+
+### Plain Spring (no Boot)
+
+Add the core library and wire the aspect yourself (see [Manual setup](#manual-setup-plain-spring)):
+
+```xml
+<dependency>
+    <groupId>io.github.vatisteve</groupId>
+    <artifactId>has-permission</artifactId>
+    <version>0.2.0</version>
 </dependency>
 ```
 
 ## Setup
+
+### Spring Boot quick start
+
+1. Implement [`PermissionService`](#1-implement-permissionservice) and expose it as a bean.
+2. That's it — the starter registers the `HasPermissionAuthorizer` aspect automatically. Annotate
+   methods/classes with `@HasPermission` and (optionally) handle `PermissionDeniedException`
+   ([step 3](#3-handle-permissiondeniedexception)).
+
+Tune behaviour via `application.properties` / `application.yml`:
+
+| Property                                  | Default  | Description                                                                                          |
+|-------------------------------------------|----------|------------------------------------------------------------------------------------------------------|
+| `has-permission.default-subject-property` | `userId` | Parameter name used as the subject when `@HasPermission` does not set an explicit `subject` SpEL.    |
+| `has-permission.deny-on-null-subject`     | `true`   | When `true`, deny if a constrained check resolves to a `null` subject; when `false`, pass `null` on. |
+
+The auto-configuration backs off if you define your own `HasPermissionAuthorizer` bean.
+
+### Manual setup (plain Spring)
 
 ### 1. Implement PermissionService
 
@@ -211,9 +244,13 @@ public Document publishDocument(@PathVariable String id, @RequestParam String us
 
 ## Notes
 
-- Make sure AspectJ is properly enabled in your Spring application
-- The subject extracted by the SpEL expression must match the generic type of your PermissionService implementation
-- For optimal performance, consider caching permission results in your PermissionService implementation
+- Make sure AspectJ is properly enabled in your Spring application (automatic with the Spring Boot starter).
+- The subject extracted by the SpEL expression must match the generic type of your PermissionService implementation.
+- For optimal performance, consider caching permission results in your PermissionService implementation. Parsed SpEL subject expressions are cached internally by the aspect.
+- **Evaluation semantics:**
+  - An `@HasPermission` with no constraints (`of`/`value`/`allOf`/`anyOf` all empty) is a no-op and always allows access — the `PermissionService` is not even consulted.
+  - When constraints are present but the subject resolves to `null` (the SpEL expression yields `null` or fails to parse/evaluate), access is denied by default (fail-closed). Set `has-permission.deny-on-null-subject=false` (or pass `false` to the 3-arg `HasPermissionAuthorizer` constructor) to instead evaluate permissions with a `null` subject.
+  - `of`, `allOf`, and `anyOf` are combined with AND semantics: every constraint that is present must pass.
 
 ## License
 

@@ -1,6 +1,6 @@
 package io.github.vatisteve;
 
-import lombok.NonNull;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;

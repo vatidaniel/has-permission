@@ -3,35 +3,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.vatisteve</groupId>
-    <artifactId>has-permission</artifactId>
-    <version>0.1.0</version>
-    <packaging>jar</packaging>
+    <artifactId>has-permission-parent</artifactId>
+    <version>0.2.0</version>
+    <packaging>pom</packaging>
 
-    <name>has-permission</name>
+    <name>has-permission-parent</name>
     <description>
-        This project provides a robust permission-checking mechanism for Java applications using Spring AOP
-        (Aspect-Oriented Programming).
-        It includes a customizable annotation (`@HasPermission`) that can be applied to methods or classes to enforce
-        permission-based access control.
-        The permission-checking logic is dynamically evaluated using SpEL (Spring Expression Language), allowing for
-        flexible and context-aware permission resolution.
-
-        Key Features:
-        - **Annotation-Driven Permissions**: Use the `@HasPermission` annotation to specify permission requirements at
-        the method or class level.
-        - **Dynamic Permission Resolution**: Supports SpEL expressions for dynamic subject resolution and permission
-        evaluation.
-        - **Integration with Permission Services**: Works seamlessly with any `PermissionService` implementation to
-        retrieve permissions for a given subject.
-        - **Aspect-Oriented Design**: Leverages Spring AOP to intercept method calls and perform permission checks
-        before execution.
-        - **Customizable Exception Handling**: Throws `PermissionDeniedException` when access is denied, providing clear
-        and actionable error messages.
-
-        This project is ideal for applications that require fine-grained access control and dynamic permission
-        management, such as enterprise systems, APIs, and web applications.
+        Parent aggregator for the has-permission permission-control library and its Spring Boot starter.
+        The core module provides an annotation-driven (@HasPermission), Spring-AOP/SpEL based permission-checking
+        mechanism; the starter module auto-configures it for Spring Boot applications.
     </description>
-    <url>https://github.com/vatisteve/has-permission</url>
+    <url>https://github.com/vatidaniel/has-permission</url>
+
+    <modules>
+        <module>core</module>
+        <module>spring-boot-starter</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -42,52 +29,44 @@
         <logback.version>1.5.18</logback.version>
         <spring.version>5.3.39</spring.version>
         <aspectj.version>1.9.23</aspectj.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <junit.version>5.11.4</junit.version>
+        <mockito.version>5.16.1</mockito.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-expression</artifactId>
-            <version>${spring.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjrt</artifactId>
-            <version>${aspectj.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.aspectj</groupId>
-            <artifactId>aspectjweaver</artifactId>
-            <version>${aspectj.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.16.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <!--
+      Note: dependency versions are intentionally NOT managed here. Maven gives parent-inherited
+      dependencyManagement precedence over a child module's imported BOM, so pinning test/library
+      versions in this parent would leak into (and conflict with) the Spring Boot BOM used by the
+      starter module. Instead, the core module pins its own versions via the properties above, and
+      the starter module derives everything from the Spring Boot BOM it imports locally.
+    -->
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <!-- Retain method parameter names so SpEL "#paramName" subject
+                             expressions resolve reliably (independent of debug info). -->
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
     <licenses>
         <license>
@@ -99,27 +78,24 @@
 
     <developers>
         <developer>
-            <name>vatisteve</name>
+            <name>Daniel Nguyen</name>
             <email>vatisteve@gmail.com</email>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:vatisteve/has-permission.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:vatisteve/has-permission.git</developerConnection>
-        <url>https://github.com/vatisteve/has-permission</url>
+        <connection>scm:git:git@github.com:vatidaniel/has-permission.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:vatidaniel/has-permission.git</developerConnection>
+        <url>https://github.com/vatidaniel/has-permission</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-    </distributionManagement>
+    <!--
+      Publishing target is the Central Publisher Portal (https://central.sonatype.org/publish/publish-portal-maven).
+      The legacy OSSRH endpoint (s01.oss.sonatype.org) was sunset on 2025-06-30, so no <distributionManagement>
+      is declared: the central-publishing-maven-plugin (release profile below) uploads directly to the portal,
+      authenticating against the <server id=central> entry in settings.xml.
+    -->
+
     <profiles>
         <profile>
             <id>release</id>
@@ -130,22 +106,23 @@
                 </property>
             </activation>
             <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.sonatype.plugins</groupId>
-                            <artifactId>nexus-staging-maven-plugin</artifactId>
-                            <version>1.6.7</version>
-                            <extensions>true</extensions>
-                            <configuration>
-                                <serverId>ossrh</serverId>
-                                <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                                <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
                 <plugins>
+                    <!-- Central Publishing Plugin: aggregates the whole reactor into a single
+                         deployment bundle and uploads it to the Central Publisher Portal. Must
+                         live in <plugins> with extensions=true so it takes over the deploy phase;
+                         authenticates against <server id=central> in settings.xml. autoPublish
+                         releases automatically once validation passes. -->
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.10.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                        </configuration>
+                    </plugin>
                     <!-- GPG Plugin for signing artifacts -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>

@@ -1,0 +1,99 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.vatisteve</groupId>
+        <artifactId>has-permission-parent</artifactId>
+        <version>0.2.0</version>
+    </parent>
+
+    <artifactId>has-permission</artifactId>
+    <packaging>jar</packaging>
+
+    <name>has-permission</name>
+    <description>
+        This project provides a robust permission-checking mechanism for Java applications using Spring AOP
+        (Aspect-Oriented Programming).
+        It includes a customizable annotation (`@HasPermission`) that can be applied to methods or classes to enforce
+        permission-based access control.
+        The permission-checking logic is dynamically evaluated using SpEL (Spring Expression Language), allowing for
+        flexible and context-aware permission resolution.
+
+        Key Features:
+        - **Annotation-Driven Permissions**: Use the `@HasPermission` annotation to specify permission requirements at
+        the method or class level.
+        - **Dynamic Permission Resolution**: Supports SpEL expressions for dynamic subject resolution and permission
+        evaluation.
+        - **Integration with Permission Services**: Works seamlessly with any `PermissionService` implementation to
+        retrieve permissions for a given subject.
+        - **Aspect-Oriented Design**: Leverages Spring AOP to intercept method calls and perform permission checks
+        before execution.
+        - **Customizable Exception Handling**: Throws `PermissionDeniedException` when access is denied, providing clear
+        and actionable error messages.
+
+        This project is ideal for applications that require fine-grained access control and dynamic permission
+        management, such as enterprise systems, APIs, and web applications.
+    </description>
+    <url>https://github.com/vatidaniel/has-permission</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test: real Spring AOP proxy integration -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
