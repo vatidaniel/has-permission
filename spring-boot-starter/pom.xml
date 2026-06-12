@@ -17,7 +17,7 @@
         classpath and exposing a PermissionService bean is enough to enable the @HasPermission aspect — no manual
         bean wiring or @EnableAspectJAutoProxy required. Behaviour is tunable via the `has-permission.*` properties.
     </description>
-    <url>https://github.com/vatisteve/has-permission</url>
+    <url>https://github.com/vatidaniel/has-permission</url>
 
     <dependencyManagement>
         <dependencies>

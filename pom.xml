@@ -13,7 +13,7 @@
         The core module provides an annotation-driven (@HasPermission), Spring-AOP/SpEL based permission-checking
         mechanism; the starter module auto-configures it for Spring Boot applications.
     </description>
-    <url>https://github.com/vatisteve/has-permission</url>
+    <url>https://github.com/vatidaniel/has-permission</url>
 
     <modules>
         <module>core</module>
@@ -84,9 +84,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:vatisteve/has-permission.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:vatisteve/has-permission.git</developerConnection>
-        <url>https://github.com/vatisteve/has-permission</url>
+        <connection>scm:git:git@github.com:vatidaniel/has-permission.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:vatidaniel/has-permission.git</developerConnection>
+        <url>https://github.com/vatidaniel/has-permission</url>
     </scm>
 
     <distributionManagement>

@@ -35,7 +35,7 @@
         This project is ideal for applications that require fine-grained access control and dynamic permission
         management, such as enterprise systems, APIs, and web applications.
     </description>
-    <url>https://github.com/vatisteve/has-permission</url>
+    <url>https://github.com/vatidaniel/has-permission</url>
 
     <dependencies>
         <dependency>
